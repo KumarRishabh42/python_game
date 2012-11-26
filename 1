@@ -1,0 +1,608 @@
+from curses import initscr,curs_set,newwin,endwin,KEY_RIGHT,KEY_LEFT,KEY_DOWN,KEY_UP
+from random import randrange
+import curses
+def welcome():
+	while(1):
+		initscr()
+		welcome=newwin(80,80,0,0)
+		curses.start_color()
+		curses.init_pair(1,curses.COLOR_CYAN,curses.COLOR_BLACK)
+		curses.init_pair(2,curses.COLOR_RED,curses.COLOR_WHITE)
+		welcome.bkgd(' ',curses.color_pair(1))
+		curses.flash()
+		d=curses.color_pair(2)
+		n=curses.A_NORMAL
+#curs_set(0)
+		welcome.keypad(1)
+		welcome.addstr(15,50,'WELCOME TO ROBO BOMB DEFUSER',n)
+		welcome.addstr(16,50,'NEW GAME',n)
+		welcome.addstr(17,50,'EXIT',n)
+		welcome.addstr(18,50,'HIGHSCORE',n)
+		welcome.addstr(19,50,'OPTIONS',n)
+		welcome.addstr(20,50,'HELP',n)
+
+		key=welcome.getch()
+		if key==ord('c') or key==ord('C'):
+			return 
+		elif key==ord('e') or key==ord('E'):
+			endwin()
+			exit()
+
+
+
+
+
+
+
+class window():
+	pass
+
+
+welcome()	
+initscr()
+curses.start_color()
+curses.init_pair(1,curses.COLOR_GREEN,curses.COLOR_BLACK)
+
+curs_set(0)
+win = newwin(30,80,5,5)
+#test= newwin(30,30,40,80)
+#test.border()
+win.bkgd(' ',curses.color_pair(1))
+
+win.keypad(1)
+win.nodelay(1)
+win.border()
+#win.addch(29,44,'O')
+
+snake = [ [30,7],[30,6],[30,5],[30,4],[29,7],[29,6],[29,5],[29,4],[28,7],[28,6],[28,5],[28,4],[27,7],[27,6],[27,5],[27,4] ]
+robocoord=[[30,7],[30,6],[29,7],[29,6]]
+robomedcoord=[[30,7],[30,6],[30,5],[29,7],[29,6],[29,5],[28,7],[28,6],[28,5]]
+key = KEY_RIGHT
+#print KEY_RIGHT
+d=10
+#win.addch(60,20,'T')
+decision=0
+cOFd=[n for n in [[randrange(1,29,1),randrange(1,79,1)] for x in range(d) ] if n not in snake]
+#print cOFd[0][1],cOFd[0][0]
+for x in range(0,len(cOFd)):
+#	print cOFd
+	win.addch(cOFd[x][0],cOFd[x][1],'C')
+	
+win.addch(randrange(1,14,1),randrange(1,58,1),'B')
+#print cOFd
+count=0
+flag=0
+decision=0
+#status=0
+#snake=map(lambda x:[x[0]+1,x[1]],snake)
+#print snake
+#for x in range(0,len(snake)):
+#   win.addch(snake[x][1],snake[x][0],'X')
+robo=['\\','|',']','/',' ','_','@','i',' ','_','@','i','/','|','[','\\']
+robo2=['|','|',']','/',' ','_',' ','i',' ','_',' ','i','|','|','[','\\']
+robo3=['|','|',']','/',' ','_','@',' ',' ','_','@',' ','|','|','[','\\']
+
+robosmall=['@','/','@','\\']
+robosmall1=[' ','/',' ','\\']
+robomed=['\\','/','-',' ','R','@','/','\\','-']
+robomed1=['|','/','>',' ','R','@','|','\\','-']
+robomed2=['|','\\','>',' ','R','@','|','/','<']
+def robomedfunc():
+	global robomedcoord
+	global key
+	global robomed
+	global flag
+	global decision
+	global count
+	global robomed1
+	global robomed2
+	for i in xrange(0,len(robomedcoord)):
+		win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed[i])
+
+	countleft=0
+	countright=0
+	countup=0
+	countdown=0
+	while key != 27:
+
+    		if(robomedcoord[0][0]==79 or robomedcoord[8][0]==0):
+			flag=-1    
+			break
+    		elif(robomedcoord[0][1]==29 or robomedcoord[2][1]==0):
+			flag=-1
+			break
+    		win.addstr(0,32,' code point' + ' : '+str(count*10)+' ')
+    		win.timeout(180-count*10)#+ ( (len(snake)-6) % 10- (len(snake)-6) ) * 3 )
+    		getkey = win.getch()
+    		key = key if getkey==-1 else getkey
+
+    		def check():
+	    		global robomedcoord
+	    		global count
+			global robomed
+			global robomed1
+			global robomed2
+	    		status=0
+	    		for i in xrange(0,len(robomedcoord)):
+		    		if(win.inch(robomedcoord[i][1],robomedcoord[i][0]) & 255 == ord('C')):
+					    count=count+1
+					    # win.addch(5,5,count)
+	    	    		elif(count==d and win.inch(robomedcoord[i][1],robomedcoord[i][0]) & 255 ==ord('B')):
+			    		    status=1
+					    return status
+		    		elif(count!=d and win.inch(robomedcoord[i][1],robomedcoord[i][0]) & 255 == ord('B')):
+			    		    status=-1
+	    				    return status				    
+					    
+	    		return status
+	
+
+    		if(key==KEY_RIGHT):
+			robomedcoord=map(lambda x:[x[0]+1,x[1]] , robomedcoord)
+			
+
+			decision=check()
+			if(decision==0):
+		
+
+				for i in xrange(0,len(robomedcoord)):
+					if countright==0:
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed[i])
+					elif countright==1:
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed1[i])
+				for i in xrange(6,9):
+					win.addch(robomedcoord[i][1],robomedcoord[i][0]-1,' ')
+				if(countright==0):
+					countright=1
+				else:
+				 	countright=0
+        		else:
+				break
+    		elif(key==KEY_LEFT):
+			robomedcoord=map(lambda x:[x[0]-1,x[1]],robomedcoord)
+	
+#	print snake
+			decision=check()
+	
+			if(decision==0):
+#		for i in xrange(0,4):
+#			win.addch(snake[i][1],snake[i][0]+1,' ')
+#		for i in xrange(4,8):
+#	 		win.addch(snake[i][1],snake[i][0],'X')
+				for i in xrange(0,len(robomedcoord)):
+					if countleft==1:
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed1[i])
+						win.addch(robomedcoord[8][1],robomedcoord[8][0],'<')
+						win.addch(robomedcoord[2][1],robomedcoord[2][0],'-')
+					else:
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed[i])
+				for i in xrange(0,3):
+		 			win.addch(robomedcoord[i][1],robomedcoord[i][0]+1,' ')
+				if(countleft==0):
+					countleft=1
+				else:
+				 	countleft=0
+			else:
+				break
+     
+#snake.insert(0,[snake[0][0]+(key==KEY_RIGHT and 1 or key==KEY_LEFT and -1), snake[0][1]+(key==KEY_DOWN and 1 or key==KEY_UP and -1)])
+    
+#    win.addch(snake[len(snake)-1][1],snake[len(snake)-1][0],' ')
+    		elif(key==KEY_DOWN):
+	    
+	    
+	    
+	    		robomedcoord=map(lambda x:[x[0],x[1]+1],robomedcoord)
+#	    	print snake
+			decision=check()
+		
+			if(decision==0):
+				for i in xrange(0,len(robomedcoord)):
+					if(countdown==0):
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed[i])
+					else:
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed2[i])
+	   			win.addch(robomedcoord[2][1]-1,robomedcoord[2][0],' ')
+	    			win.addch(robomedcoord[5][1]-1,robomedcoord[5][0],' ')
+	   			win.addch(robomedcoord[8][1]-1,robomedcoord[8][0],' ')
+	   			if(countdown==0):
+					countdown=1
+				else:
+				 	countdown=0
+	    		else:
+		    		break
+    		elif(key==KEY_UP):
+	    
+	
+	    
+	    		robomedcoord=map(lambda x:[x[0],x[1]-1],robomedcoord)
+#		print snake    	
+			decision=check()
+		
+			if(decision==0):
+				for i in xrange(0,len(robomedcoord)):
+					if(countup==0):
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed[i])
+	    				elif(countup==1):
+						win.addch(robomedcoord[i][1],robomedcoord[i][0],robomed2[i])
+	    			win.addch(robomedcoord[0][1]+1,robomedcoord[0][0],' ')
+	    			win.addch(robomedcoord[3][1]+1,robomedcoord[3][0],' ')
+				win.addch(robomedcoord[6][1]+1,robomedcoord[6][0],' ')
+				if(countup==0):
+					countup=1
+				else:
+				 	countup=0
+				
+	    		else:
+		    		break
+	
+	
+
+
+	
+#	print snake
+
+
+
+
+
+
+def robosmallfunc():
+	global robocoord
+	global key
+	global robosmall
+
+	global flag
+	global decision
+	global count
+	global robsmall2
+	countright=0
+	countleft=0
+	countup=0
+	countdown=0
+
+	for i in xrange(0,len(robocoord)):
+		win.addch(robocoord[i][1],robocoord[i][0],robosmall[i])
+        	
+		
+	while key != 27:
+
+    		if(robocoord[0][0]==79 or robocoord[3][0]==0):
+			flag=-1    
+			break
+    		elif(robocoord[0][1]==29 or robocoord[1][1]==0):
+			flag=-1
+			break
+    		win.addstr(0,32,' code point' + ' : '+str(count*10)+' ')
+    		win.timeout(180-count*10)#+ ( (len(snake)-6) % 10- (len(snake)-6) ) * 3 )
+    		getkey = win.getch()
+    		key = key if getkey==-1 else getkey
+
+    		def check():
+	    		global robocoord
+	    		global count
+			global robosmall
+			global decision
+			global robosmall2
+	    		status=0
+	    		for i in xrange(0,len(robocoord)):
+		    		if(win.inch(robocoord[i][1],robocoord[i][0]) & 255 == ord('C')):
+					    count=count+1
+					    # win.addch(5,5,count)
+	    	    		elif(count==d and win.inch(robocoord[i][1],robocoord[i][0]) & 255 ==ord('B')):
+			    		    status=1
+					    return status
+		    		elif(count!=d and win.inch(robocoord[i][1],robocoord[i][0]) & 255 == ord('B')):
+			    		    status=-1
+	    				    return status				    
+					    
+	    		return status
+	
+
+    		if(key==KEY_RIGHT):
+			robocoord=map(lambda x:[x[0]+1,x[1]] , robocoord)
+	
+
+			decision=check()
+			if(decision==0):
+		
+
+				for i in xrange(0,len(robocoord)):
+					if countright==0:
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall[i])
+					else:
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall1[i])
+				for i in xrange(2,4):
+					win.addch(robocoord[i][1],robocoord[i][0]-1,' ')	
+				if countright==0:
+				 	countright=1
+				else:
+				 	countright=0
+
+        		else:
+				break
+    		elif(key==KEY_LEFT):
+			robocoord=map(lambda x:[x[0]-1,x[1]],robocoord)
+	
+#	print snake
+			decision=check()
+	
+			if(decision==0):
+#		for i in xrange(0,4):
+#			win.addch(snake[i][1],snake[i][0]+1,' ')
+#		for i in xrange(4,8):
+#	 		win.addch(snake[i][1],snake[i][0],'X')
+				for i in xrange(0,len(robocoord)):
+					if countleft==0:
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall[i])
+					else :
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall1[i])
+				for i in xrange(0,2):
+		 			win.addch(robocoord[i][1],robocoord[i][0]+1,' ')
+				if countleft==0:
+				  	countleft=1
+				else:
+				  	countleft=0
+			else:
+				break
+     
+#snake.insert(0,[snake[0][0]+(key==KEY_RIGHT and 1 or key==KEY_LEFT and -1), snake[0][1]+(key==KEY_DOWN and 1 or key==KEY_UP and -1)])
+    
+#    win.addch(snake[len(snake)-1][1],snake[len(snake)-1][0],' ')
+    		elif(key==KEY_DOWN):
+	    
+	    
+	    
+	    		robocoord=map(lambda x:[x[0],x[1]+1],robocoord)
+#	    	print snake
+			decision=check()
+		
+			if(decision==0):
+				
+
+				for i in xrange(0,len(robocoord)):
+					if countdown==0:
+
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall[i])
+					else:
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall1[i])
+						win.addch(robocoord[1][1],robocoord[1][0],'\\')
+						win.addch(robocoord[3][1],robocoord[3][0],'/')
+				
+	   			win.addch(robocoord[1][1]-1,robocoord[1][0],' ')
+	    			win.addch(robocoord[3][1]-1,robocoord[3][0],' ')
+	   			if countdown==0:
+					countdown=1
+				else:
+					countdown=0
+	   			
+	    		else:
+		    		break
+    		elif(key==KEY_UP):
+	    
+	
+	    
+	    		robocoord=map(lambda x:[x[0],x[1]-1],robocoord)
+#		print snake    	
+			decision=check()
+		
+			if(decision==0):
+				for i in xrange(0,len(robocoord)):
+					if countup==0:
+					
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall[i])
+	    				else:
+						
+						win.addch(robocoord[i][1],robocoord[i][0],robosmall1[i])
+						win.addch(robocoord[1][1],robocoord[1][0],'\\')
+						win.addch(robocoord[3][1],robocoord[3][0],'/')
+	    			win.addch(robocoord[0][1]+1,robocoord[0][0],' ')
+	    			win.addch(robocoord[2][1]+1,robocoord[2][0],' ')
+				if countup==0:
+					countup=1
+				else:
+					countup=0
+	    		else:
+		    		break
+	
+	
+
+
+def robo1():
+	global snake
+	global key
+	global robo
+	global flag
+	global decision
+	countright=countleft=countup=countdown=0
+	win.addch(snake[0][1],snake[0][0],'\\')
+	win.addch(snake[1][1],snake[1][0],'|')
+	win.addch(snake[2][1],snake[2][0],']')
+	win.addch(snake[3][1],snake[3][0],'/')
+	win.addch(snake[4][1],snake[4][0],' ')
+	win.addch(snake[5][1],snake[5][0],'_')
+	win.addch(snake[6][1],snake[6][0],'@')
+	win.addch(snake[7][1],snake[7][0],'i')
+	win.addch(snake[8][1],snake[8][0],' ')
+	win.addch(snake[9][1],snake[9][0],'_')
+	win.addch(snake[10][1],snake[10][0],'@')
+	win.addch(snake[11][1],snake[11][0],'i')
+	win.addch(snake[12][1],snake[12][0],'/')
+	win.addch(snake[13][1],snake[13][0],'|')
+	win.addch(snake[14][1],snake[14][0],'[')
+	win.addch(snake[15][1],snake[15][0],'\\')
+	while key != 27:
+
+    		if(snake[0][0]==79 or snake[15][0]==0):
+			flag=-1    
+			break
+    		elif(snake[0][1]==29 or snake[7][1]==0):
+			flag=-1
+			break
+    		win.addstr(0,32,' code point' + ' : '+str(count*10)+' ')
+    		win.timeout(180-count*8)#+ ( (len(snake)-6) % 10- (len(snake)-6) ) * 3 )
+    		getkey = win.getch()
+    		key = key if getkey==-1 else getkey
+
+    		def check():
+	    		global snake 
+	    		global count
+	    		status=0
+	    		for i in xrange(0,len(snake)):
+		    		if(win.inch(snake[i][1],snake[i][0]) & 255 == ord('C')):
+					    count=count+1
+					    # win.addch(5,5,count)
+	    	    		elif(count==d and win.inch(snake[i][1],snake[i][0]) & 255 ==ord('B')):
+			    		    status=1
+					    return status
+		    		elif(count!=d and win.inch(snake[i][1],snake[i][0]) & 255 == ord('B')):
+			    		    status=-1
+	    				    return status				    
+					    
+	    		return status
+	
+
+    		if(key==KEY_RIGHT):
+			snake=map(lambda x:[x[0]+1,x[1]] , snake)
+	
+
+			decision=check()
+			if(decision==0):
+		
+
+				for i in xrange(0,len(snake)):
+					if countright==0:
+						win.addch(snake[i][1],snake[i][0],robo[i])
+					else:
+						win.addch(snake[i][1],snake[i][0],robo2[i])
+				for i in xrange(12,16):
+					win.addch(snake[i][1],snake[i][0]-1,' ')
+				if countright==0:
+				 	countright=1
+				else:
+				 	countright=0
+
+        		else:
+				break
+    		elif(key==KEY_LEFT):
+			snake=map(lambda x:[x[0]-1,x[1]],snake)
+	
+#	print snake
+			decision=check()
+	
+			if(decision==0):
+#		for i in xrange(0,4):
+#			win.addch(snake[i][1],snake[i][0]+1,' ')
+#		for i in xrange(4,8):
+#	 		win.addch(snake[i][1],snake[i][0],'X')
+				for i in xrange(0,len(snake)):
+					if countleft==0:
+
+						win.addch(snake[i][1],snake[i][0],robo[i])
+					else:
+						win.addch(snake[i][1],snake[i][0],robo2[i])
+
+				for i in xrange(0,4):
+		 			win.addch(snake[i][1],snake[i][0]+1,' ')
+				if countleft==0:
+				  	countleft=1
+				else:
+				  	countleft=0
+			else:
+				break
+     
+#snake.insert(0,[snake[0][0]+(key==KEY_RIGHT and 1 or key==KEY_LEFT and -1), snake[0][1]+(key==KEY_DOWN and 1 or key==KEY_UP and -1)])
+    
+#    win.addch(snake[len(snake)-1][1],snake[len(snake)-1][0],' ')
+    		elif(key==KEY_DOWN):
+	    
+	    
+	    
+	    		snake=map(lambda x:[x[0],x[1]+1],snake)
+#	    	print snake
+			decision=check()
+		
+			if(decision==0):
+				for i in xrange(0,len(snake)):
+					if countdown==0:
+
+						win.addch(snake[i][1],snake[i][0],robo[i])
+					else:
+						win.addch(snake[i][1],snake[i][0],robo3[i])
+	   			win.addch(snake[3][1]-1,snake[3][0],' ')
+	    			win.addch(snake[7][1]-1,snake[7][0],' ')
+	   			win.addch(snake[11][1]-1,snake[11][0],' ')
+	   			win.addch(snake[15][1]-1,snake[15][0],' ')
+				if countdown==0:
+					countdown=1
+				else:
+					countdown=0
+	    		else:
+		    		break
+    		elif(key==KEY_UP):
+	    
+	
+	    
+	    		snake=map(lambda x:[x[0],x[1]-1],snake)
+#		print snake    	
+			decision=check()
+		
+			if(decision==0):
+				for i in xrange(0,len(snake)):
+					if countup==0:
+						win.addch(snake[i][1],snake[i][0],robo[i])
+					else:
+						win.addch(snake[i][1],snake[i][0],robo3[i])
+	    	
+	    			win.addch(snake[0][1]+1,snake[0][0],' ')
+	    			win.addch(snake[4][1]+1,snake[4][0],' ')
+				win.addch(snake[8][1]+1,snake[8][0],' ')
+				win.addch(snake[12][1]+1,snake[12][0],' ')
+				if countup==0:
+					countup=1
+				else:
+					countup=0
+	    		else:
+		    		break
+	
+    
+    
+    
+#print win.inch(snake[0][1],snake[0][0])
+#if win.inch(snake[0][1],snake[0][0]) & 255 == 32: 
+#	win.addch(snake[0][1],snake[0][0],'X')
+#	snake.pop()
+    
+#   elif win.inch(snake[0][1],snake[0][0]) & 255 == ord('C'):  
+#	win.addch(snake[0][1],snake[0][0],'X')
+#	snake.pop()
+#	count=count+1       
+#	c = [n for n in [[randrange(1,58,1),randrange(1,14,1)] for x in range(len(snake))] if n not in snake]
+#	print c
+#       win.addch(c == [] and 4 or c[0][1],c == [] and 44 or c[0][0],'C')
+#    elif count!=d and win.inch(snake[0][1],snake[0][0]) & 255 == ord('B'):
+#	    flag=0
+#	    break
+#   elif count==d and win.inch(snake[0][1],snake[0][0]) & 255 == ord('B'):
+#	    flag=1
+#	    break
+#   else:
+#	flag=0
+#	break
+robo1()
+endwin()
+if flag==-1:
+	print "robot left the arena"
+	print "number of codes collected",str(count),"and yout score is",str(count*10)
+	print "robot.py","(by Kumar Rishabh","thanks for playing anyway"
+elif decision==1:
+	
+	print "Mission successful"
+	print "Number of codes collected",str(count),"and your score is",str(count*10)
+	print "robot.py","(by Kumar Rishabh)","thanks for playing"
+else:
+	#win.flash()
+	print "Mission fucked"
+	print "Number of codes collected",str(count),"and your score is",str(count*10)
+	print "robot.py","(by Kumar Rishabh)","thanks for playing anyway"
+#print '\n  Snake.PY (by Kumar Rishabh),\, n  Thanks for playing, your score: '+str(len(snake)-7)+'\n'
